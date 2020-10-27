@@ -1,15 +1,5 @@
-# Color Identification
-
 import cv2 as cv
 import numpy as np
-
-
-path = "project_folder/Untitled.png"
-
-
-def empty(var):
-    pass
-
 
 def stackImages(scale,imgArray):
     rows = len(imgArray)
@@ -42,37 +32,14 @@ def stackImages(scale,imgArray):
         ver = hor
     return ver
 
-cv.namedWindow("TrackBars")
-cv.resizeWindow("TrackBars",640,240)
-cv.createTrackbar("Hue Min","TrackBars",87,179,empty)
-cv.createTrackbar("Hue Max","TrackBars",112,179,empty)
-cv.createTrackbar("Sat Min","TrackBars",86,255,empty)
-cv.createTrackbar("Sat Max","TrackBars",255,255,empty)
-cv.createTrackbar("Val Min","TrackBars",67,255,empty)
-cv.createTrackbar("Val Max","TrackBars",255,255,empty)
 
-while True:
-    img = cv.imread(path)
-    imgHSV = cv.cvtColor(img,cv.COLOR_BGR2HSV)
-    h_min = cv.getTrackbarPos("Hue Min","TrackBars")
-    h_max = cv.getTrackbarPos("Hue Max", "TrackBars")
-    s_min = cv.getTrackbarPos("Sat Min", "TrackBars")
-    s_max = cv.getTrackbarPos("Sat Max", "TrackBars")
-    v_min = cv.getTrackbarPos("Val Min", "TrackBars")
-    v_max = cv.getTrackbarPos("Val Max", "TrackBars")
-    print(h_min,h_max,s_min,s_max,v_min,v_max)
-    lower = np.array([h_min,s_min,v_min])
-    upper = np.array([h_max,s_max,v_max])
-    mask = cv.inRange(imgHSV,lower,upper)
-    imgResult = cv.bitwise_and(img, img, mask=mask)
-    new_colored_img = cv.cvtColor(imgResult,cv.COLOR_BGR2XYZ)
+img = cv.imread("project_folder/shapes.jpg")
+imggray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+imgblur = cv.GaussianBlur(imggray,(9,9),1) #GaussianBlur it always required to be odd params
+ingcanny = cv.Canny(imgblur,50,50)
 
-    #cv.imshow("Original", img)
-    #cv.imshow("HSV",imgHSV)
-    #cv.imshow("Mask",mask)
+imgstack = stackImages(1.2,([img,imggray],[imgblur,ingcanny]))
 
-    imgStack = stackImages(0.7, ([img, imgHSV], [mask, imgResult],[imgResult,new_colored_img]))
-    cv.imshow("Stacked Images", imgStack)
+cv.imshow("Stacked Images" , imgstack)
 
-
-    cv.waitKey(1)
+cv.waitKey(0)
